@@ -25,7 +25,7 @@ class Solver:
         self.sampler = sampler.AdversarySampler(self.args.budget)
 
 
-    def read_data(self, dataloader, labels=True):
+    def read_data(self, dataloader, labels=True):    
         if labels:
             while True:
                 for img, label, _ in dataloader:
@@ -191,6 +191,7 @@ class Solver:
             preds = torch.argmax(preds, dim=1).cpu().numpy()
             correct += accuracy_score(labels, preds, normalize=False)
             total += imgs.size(0)
+    
         return correct / total * 100
 
     def test(self, task_model):

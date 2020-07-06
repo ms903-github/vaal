@@ -75,3 +75,26 @@ class ImageNet(Dataset):
 
     def __len__(self):
         return len(self.imagenet)
+
+def change_path(path):
+    return os.path.join("./data/office-home", path[10:])
+
+def load_pict(load_path, transform):
+    class MyDataset(Dataset):
+        def __init__(self, file_path, transform):
+            self.df = pd.read_csv(file_path)
+            self.transform = transform
+
+        def __len__(self):
+            return len(self.df)
+        
+        def __getitem__(self, idx):
+            img_path = self.df.iloc[idx]["image_path"]
+            label = self.df.iloc[idx]["label"]
+            img = Image.open(change_path(img_path))
+            img = self.transform(img)
+            return img, label, idx
+    dataset = MyDataset(load_path, transform=transform)
+
+    return(dataset)
+

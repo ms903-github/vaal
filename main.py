@@ -61,6 +61,21 @@ def main(args):
         args.budget = 64060
         args.initial_budget = 128120
         args.num_classes = 1000
+
+    elif args.dataset == 'office-home':
+        train_dataset = load_pict('data/office-home/all_train.csv', officehome_transformer())
+        test_dataset = load_pict('data/office-home/all_test.csv', officehome_transformer())
+        # train_dataset = load_pict('data/office-home/RealWorld_train.csv')
+        # test_dataset = load_pict('data/office-home/RealWorld_test.csv')
+        test_dataloader = data.DataLoader(
+            test_dataset, drop_last=False, batch_size=args.batch_size
+        )
+        args.num_images = 6140
+        args.num_val = 2600
+        args.budget = 307
+        args.initial_budget = 614
+        args.num_classes = 65
+
     else:
         raise NotImplementedError
 
@@ -91,7 +106,7 @@ def main(args):
         # need to retrain all the models on the new images
         # re initialize and retrain the models
         task_model = vgg.vgg16_bn(num_classes=args.num_classes)
-        vae = model.VAE(args.latent_dim)
+        vae = model.VAE(args.img_dim, args.latent_dim)
         discriminator = model.Discriminator(args.latent_dim)
 
         unlabeled_indices = np.setdiff1d(list(all_indices), current_indices)
@@ -116,7 +131,10 @@ def main(args):
         sampler = data.sampler.SubsetRandomSampler(current_indices)
         querry_dataloader = data.DataLoader(train_dataset, sampler=sampler, 
                 batch_size=args.batch_size, drop_last=True)
-
+        sampled = []
+        for idx in sampled_indices:
+            sampled.append(train_dataset[idx])
+        torch.save(sampled, os.path.join(args.out_path, 'sampled_{}.log'.format(split)))
     torch.save(accuracies, os.path.join(args.out_path, args.log_name))
 
 if __name__ == '__main__':
